@@ -36,7 +36,7 @@ $<HTMLFormElement>('form').addEventListener('submit', (e) => {
   const typed = { dvm: $<HTMLInputElement>('f-dvm').value, patient: $<HTMLInputElement>('f-patient').value };
   const error = $('giris-hata');
   if (!matches(typed, manifest)) {
-    error.textContent = "These names don't match the current case. Check the spelling, or write to info@vimics.vet.";
+    error.textContent = "These names don't match with a case. Check the spelling, or write to info@vimics.vet.";
     error.hidden = false;
     $('form').classList.add('hatali');
     $('f-dvm').focus();

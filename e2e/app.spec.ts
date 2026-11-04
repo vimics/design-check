@@ -50,7 +50,7 @@ test.describe('name check', () => {
 
     for (const [dvm, patient] of [['Ayşe Yılmaz', 'Maxi'], ['Ayşe', 'Max'], ['', '']]) {
       await enter(page, dvm, patient);
-      await expect(page.locator('#giris-hata')).toHaveText("These names don't match the current case. Check the spelling, or write to info@vimics.vet.");
+      await expect(page.locator('#giris-hata')).toHaveText("These names don't match with a case. Check the spelling, or write to info@vimics.vet.");
       await expect(page.locator('#giris')).toBeVisible();
     }
     // Typing again clears the message.
