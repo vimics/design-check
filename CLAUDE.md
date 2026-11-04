@@ -1,6 +1,6 @@
 # Design Viewer · vimics.vet/design-check
 
-A static page from Vimics. A DVM types their name and the patient's name, and if both match the current case, sees the implant design (STL files) in 3D. Umut swaps the case about every two weeks. How to do that is in `README.md`.
+A static page from Vimics. A DVM types their name and the patient's name, and if both match the current case, sees the implant design (STL files) in 3D. Umut and teammates who don't code swap the case about every two weeks, following `case/README.md`. Keep that file plain and in step with how the case check works.
 
 Umut and Onur build this by working with AI agents. Explain what you change in plain words.
 
