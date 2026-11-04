@@ -8,6 +8,10 @@ It isn't linked from vimics.vet. Umut sends the link to the DVM.
 
 ## Publish a new case
 
+**In short:** put the STLs in the `case` folder, named `<name>.<tag>.stl`, for example `TPLO plate 3.5 mm.metal.stl`. The five tags are `bone`, `metal`, `resin-white`, `resin-clear` and `screw`. Then type the DVM name, patient name and note into `case.json`. The steps below walk through it on github.dev, the in-browser editor, as one commit, so a mix of old and new files never goes live. You can also just ask an agent with the files and names.
+
+If a file is misnamed or `case.json` is broken, the deploy stops and the live page stays as it was. The error says in plain words which file is wrong.
+
 The `case` folder holds the one case that is live:
 
 ```
