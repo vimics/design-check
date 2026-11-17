@@ -45,7 +45,7 @@ test.describe('name check', () => {
     page.on('request', (r) => { if (r.url().includes('/case/')) fetched.push(r.url()); });
     await page.goto('/');
     await expect(page.locator('meta[name="robots"]')).toHaveAttribute('content', 'noindex');
-    await expect(page.locator('.urun-ad')).toHaveText('Design Viewer');
+    await expect(page.locator('.urun-ad')).toHaveText('Prova');
     await expect(page.locator('#yanit')).toBeHidden();
     await expect(page.locator('#vaka')).toBeHidden();
 
