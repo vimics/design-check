@@ -10,6 +10,7 @@ describe('part names', () => {
   it('takes the label and tag from the file name', () => {
     expect(parsePartName('TPLO plate 3.5 mm.metal.stl')).toEqual({ label: 'TPLO plate 3.5 mm', tag: 'metal' });
     expect(parsePartName('Cutting_guide.Resin-Clear.STL')).toEqual({ label: 'Cutting guide', tag: 'resin-clear' });
+    expect(parsePartName('Osteosarcoma.Tumor.stl')).toEqual({ label: 'Osteosarcoma', tag: 'tumor' });
     expect(parsePartName('Spacer.resin white.stl')).toEqual({ label: 'Spacer', tag: 'resin-white' });
   });
 
@@ -46,8 +47,8 @@ describe('case folder', () => {
   });
 
   it('lists bone first, then the other parts by tag', () => {
-    const { folder: f } = readCaseFolder(folder({ 'case.json': '{ "dvm": "A B", "patient": "C" }', 'A screw.screw.stl': stl, 'Plate.metal.stl': stl, 'Tibia.bone.stl': stl }));
-    expect(f.parts.map((p) => p.label)).toEqual(['Tibia', 'Plate', 'A screw']);
+    const { folder: f } = readCaseFolder(folder({ 'case.json': '{ "dvm": "A B", "patient": "C" }', 'A screw.screw.stl': stl, 'Plate.metal.stl': stl, 'Mass.tumor.stl': stl, 'Tibia.bone.stl': stl }));
+    expect(f.parts.map((p) => p.label)).toEqual(['Tibia', 'Mass', 'Plate', 'A screw']);
   });
 
   // The deploy runs this first, so a mistake in the live case stops it before anything is published.

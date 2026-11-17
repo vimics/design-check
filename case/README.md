@@ -6,7 +6,7 @@ This folder is the case the DVM sees at https://vimics.vet/design-check/. Whatev
 
 ## In short
 
-Put the STLs in this folder, named `<name>.<tag>.stl`, for example `TPLO plate 3.5 mm.metal.stl`. The five tags are `bone`, `metal`, `resin-white`, `resin-clear` and `screw`. Then type the DVM name, patient name and note into `case.json`. The steps below do it on github.dev, the editor in your browser, all in one save, so a mix of old and new files never goes live. You can also just ask an agent with the files and names.
+Put the STLs in this folder, named `<name>.<tag>.stl`, for example `TPLO plate 3.5 mm.metal.stl`. The six tags are `bone`, `tumor`, `metal`, `resin-white`, `resin-clear` and `screw`. Then type the DVM name, patient name and note into `case.json`. The steps below do it on github.dev, the editor in your browser, all in one save, so a mix of old and new files never goes live. You can also just ask an agent with the files and names.
 
 If a file is misnamed or `case.json` is broken, the website doesn't update and the live page stays as it was. The error says in plain words which file is wrong.
 
@@ -20,12 +20,13 @@ Rename each file on your computer before uploading: `<name>.<tag>.stl`
 | Tag | Shows as |
 |---|---|
 | `bone` | Ivory |
+| `tumor` | Muted red, so it stands out from the bone |
 | `metal` | Metal grey |
 | `resin-white` | White |
 | `resin-clear` | Clear, like a surgical guide |
 | `screw` | Dark blue |
 
-Examples: `Amputated Tibia.bone.stl`, `ITAP.metal.stl`, `Cutting guide.resin-clear.stl`, `Screw 1.screw.stl`
+Examples: `Amputated Tibia.bone.stl`, `Osteosarcoma.tumor.stl`, `ITAP.metal.stl`, `Cutting guide.resin-clear.stl`, `Screw 1.screw.stl`
 
 ## 2. Know what goes in case.json
 

@@ -1,7 +1,7 @@
 export type Vec3 = [number, number, number];
 
 /** What each STL is made of. The file name carries it: `<label>.<tag>.stl`. */
-export const TAGS = ['bone', 'metal', 'resin-white', 'resin-clear', 'screw'] as const;
+export const TAGS = ['bone', 'tumor', 'metal', 'resin-white', 'resin-clear', 'screw'] as const;
 export type Tag = (typeof TAGS)[number];
 
 export interface PartMesh {

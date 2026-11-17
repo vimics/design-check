@@ -32,7 +32,7 @@ Umut and Onur build this by working with AI agents. Explain what you change in p
 ## Publishing a case for Umut
 
 - Replace everything in `case/` in one commit: delete the old STLs, add the new ones as `<label>.<tag>.stl`, and set `dvm`, `patient` and `note` in `case.json`.
-- The tags are exactly these five: `bone`, `metal`, `resin-white`, `resin-clear`, `screw`. Don't add more unless Umut asks.
+- The tags are exactly these six: `bone`, `tumor`, `metal`, `resin-white`, `resin-clear`, `screw`. Don't add more unless Umut asks.
 - Run `npm test` before pushing. Then open the live page with the names and check that every part shows.
 
 ## Rules that must not break
