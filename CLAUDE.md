@@ -1,4 +1,4 @@
-# Design Viewer · vimics.vet/design-check
+# Design Viewer · vimics.vet/prova
 
 A static page from Vimics. A DVM types their name and the patient's name, and if both match one of the live cases, sees that implant design (STL files) in 3D. Several cases are live at once, one folder each in `cases/`. Umut and teammates who don't code add and remove cases following `cases/README.md`. Keep that file plain and in step with how the case check works.
 
@@ -10,7 +10,7 @@ Umut and Onur build this by working with AI agents. Explain what you change in p
 |---|---|---|
 | vimics.vet | `vimics/vimics.github.io` | Main site, owned by Onur. Don't change it for this tool |
 | vimics.vet/segmentation/ | `vimics/segmentation` | V-Seg. Don't change it for this tool |
-| vimics.vet/design-check/ | `vimics/design-check` (this repo) | Design Viewer |
+| vimics.vet/prova/ | `vimics/prova` (this repo) | Design Viewer |
 
 - Every push to `main` goes live. `.github/workflows/deploy.yml` runs the unit tests, which include a check of every folder in `cases/`, then builds into `dist/` and publishes. If the tests fail, the live site stays as it was.
 - `dist/` is built, never committed. Keep paths relative, because the site runs from a subfolder.

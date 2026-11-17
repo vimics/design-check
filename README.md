@@ -1,6 +1,6 @@
 # Design Viewer (Vimics)
 
-A page at https://vimics.vet/design-check/ where a DVM reviews the implant design Vimics prepared for their patient. They type their own name and the patient's name. If both match one of the live cases, that case opens in the 3D viewer: rotate, section, measure distances and angles, show or hide each part, see through bone, and save a snapshot.
+A page at https://vimics.vet/prova/ where a DVM reviews the implant design Vimics prepared for their patient. They type their own name and the patient's name. If both match one of the live cases, that case opens in the 3D viewer: rotate, section, measure distances and angles, show or hide each part, see through bone, and save a snapshot.
 
 It isn't linked from vimics.vet. Umut sends the link to the DVM.
 

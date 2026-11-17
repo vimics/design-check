@@ -10,8 +10,6 @@ let caseLine = '';
 const $ = <T extends HTMLElement = HTMLElement>(id: string) => document.getElementById(id) as T;
 const num = (n: number) => n.toLocaleString('en-GB');
 const LOGO = document.querySelector('.logo-link svg')?.outerHTML ?? '';
-/** Holds the case a DVM opened in this tab, so a refresh doesn't ask again but a new case does. */
-const OPENED = 'design-viewer-case';
 
 const today = new Date().toLocaleDateString('en-GB', { day: 'numeric', month: 'short', year: 'numeric' });
 
@@ -46,7 +44,6 @@ $<HTMLFormElement>('form').addEventListener('submit', (e) => {
     return;
   }
   manifest = found;
-  sessionStorage.setItem(OPENED, manifest.id);
   openCase();
 });
 for (const id of ['f-dvm', 'f-patient']) {
@@ -316,7 +313,5 @@ if (!document.createElement('canvas').getContext('webgl2')) {
   show('error');
   $('hata-metin').textContent = 'This browser cannot show 3D graphics. Use a current version of Chrome, Edge, Safari or Firefox with hardware acceleration turned on.';
   $('yeniden').hidden = true;
-} else {
-  const opened = cases.find((c) => c.id === sessionStorage.getItem(OPENED));
-  if (opened) { manifest = opened; openCase(); } else show('gate');
-}
+// A refresh always asks for the names again, so the next case can be opened in the same tab.
+} else show('gate');

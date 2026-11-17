@@ -20,8 +20,6 @@ export interface Part extends PartMesh {
 
 /** One case, as the build hands it to the page. The page gets a list of them, one per folder in cases/. */
 export interface CaseManifest {
-  /** Changes whenever the case does, so an earlier match doesn't open a new case. */
-  id: string;
   dvm: string;
   patient: string;
   note: string;

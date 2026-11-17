@@ -99,8 +99,7 @@ function toManifest(dir: string, folder: CaseFolder, files: Map<string, Buffer>)
     files.set(url, gz);
     return { url, label: p.label, tag: p.tag, bytes: gz.length };
   });
-  const id = createHash('sha256').update(JSON.stringify([folder.dvm, folder.patient, parts.map((p) => p.url)])).digest('hex').slice(0, 12);
-  return { id, dvm: folder.dvm, patient: folder.patient, note: folder.note, parts };
+  return { dvm: folder.dvm, patient: folder.patient, note: folder.note, parts };
 }
 
 /** Hands the cases to the page and publishes each STL gzipped, under a name that changes with its content. */

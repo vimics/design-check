@@ -1,6 +1,6 @@
 # How to add or remove a case
 
-This folder holds the cases DVMs see at https://vimics.vet/design-check/. Each case is its own folder in here, such as `cases/karamel/`. Every case folder goes live, and several cases can be live at the same time. A DVM types their name and the patient's name, and the page opens the case that matches.
+This folder holds the cases DVMs see at https://vimics.vet/prova/. Each case is its own folder in here, such as `cases/karamel/`. Every case folder goes live, and several cases can be live at the same time. A DVM types their name and the patient's name, and the page opens the case that matches.
 
 **Everything in this folder is public.** Anyone can download the STL files and read the names, here and on the website. All the live cases' names are in the page's code too, so a DVM who knows where to look could find and open another DVM's case.
 
@@ -52,7 +52,7 @@ Keep the quotes and the commas exactly as above. A missing comma or quote is the
 
 ## 3. Add a case, all in one save
 
-1. Open https://github.dev/vimics/design-check. Sign in to GitHub if it asks.
+1. Open https://github.dev/vimics/prova. Sign in to GitHub if it asks.
 2. On the left, right-click the `cases` folder, then **New Folder**. Name it after the patient in lowercase, for example `karamel`.
 3. Drag the STL files from your computer into that new folder.
 4. Copy `case.json` from another case folder into the new one: right-click it, **Copy**, then right-click the new folder, **Paste**. Click the copy and change the names and note.
@@ -73,6 +73,6 @@ The link stops opening that case. The files stay in the Git history.
 
 ## 5. Check that it went live
 
-1. Go to https://github.com/vimics/design-check/actions and wait for the top **Deploy** run to finish, about 2 minutes.
-2. **Green tick:** it's live. Open https://vimics.vet/design-check/, type the two names, and check that every part shows. Then send the link to the DVM.
+1. Go to https://github.com/vimics/prova/actions and wait for the top **Deploy** run to finish, about 2 minutes.
+2. **Green tick:** it's live. Open https://vimics.vet/prova/, type the two names, and check that every part shows. Then send the link to the DVM.
 3. **Red cross:** nothing changed on the website. Click the run, then **build**, then **npm test**. The message says what's wrong and names the case folder and the file. Fix it the same way as step 3.

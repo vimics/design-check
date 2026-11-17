@@ -60,7 +60,7 @@ test.describe('name check', () => {
     expect(fetched).toEqual([]);
   });
 
-  test('matches whatever the case, accents or dotless i, and a refresh skips the check', async ({ page }) => {
+  test('matches whatever the case, accents or dotless i, and a refresh asks again', async ({ page }) => {
     const problems = collectProblems(page);
     const outside: string[] = [];
     page.on('request', (r) => { if (!r.url().startsWith('http://localhost') && !r.url().startsWith('blob:') && !r.url().startsWith('data:')) outside.push(r.url()); });
@@ -71,8 +71,8 @@ test.describe('name check', () => {
     await expect(page.locator('#yanit')).toHaveAttribute('href', `mailto:info@vimics.vet?subject=${encodeURIComponent('Design – Max')}`);
 
     await page.reload();
-    await waitForModel(page);
-    await expect(page.locator('#giris')).toBeHidden();
+    await expect(page.locator('#giris')).toBeVisible();
+    await expect(page.locator('#f-dvm')).toHaveValue('');
     expect(outside).toEqual([]);
     expect(problems).toEqual([]);
   });
@@ -87,10 +87,12 @@ test.describe('name check', () => {
     await expect(page.locator('#parcalar')).toContainText('Mass');
     await expect(page.locator('#parcalar')).toContainText('Tumor');
 
-    // A refresh keeps this case, not the first one in the folder.
+    // After a refresh, the other case opens in the same tab.
     await page.reload();
+    await enter(page);
     await waitForModel(page);
-    await expect(page.locator('#vaka-satir')).toHaveText('Max · Prepared for Mehmet Kaya, DVM');
+    await expect(page.locator('#vaka-satir')).toHaveText('Max · Prepared for Ayşe Yılmaz, DVM');
+    await expect(page.locator('#parcalar li')).toHaveCount(5);
     expect(problems).toEqual([]);
   });
 });
