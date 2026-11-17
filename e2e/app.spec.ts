@@ -1,7 +1,8 @@
 import { expect, test, type Page } from '@playwright/test';
 
-// The fixture case in e2e/fixture-case: a bone cylinder along Z (radius 8 mm), a plate on its +X side
+// Two fixture cases in e2e/fixture-cases. tibia (Ayşe Yılmaz, Max): a bone cylinder along Z (radius 8 mm), a plate on its +X side
 // (x 8.5 to 11.5 mm, y ±5, z ±20), a screw along X at z = 10, a clear guide, and a white spacer.
+// mass (Mehmet Kaya, Max): one tumor part, so the same patient name opens a different case per DVM.
 
 function collectProblems(page: Page) {
   const problems: string[] = [];
@@ -73,6 +74,23 @@ test.describe('name check', () => {
     await waitForModel(page);
     await expect(page.locator('#giris')).toBeHidden();
     expect(outside).toEqual([]);
+    expect(problems).toEqual([]);
+  });
+
+  test('each pair of names opens its own case', async ({ page }) => {
+    const problems = collectProblems(page);
+    await page.goto('/');
+    await enter(page, 'Mehmet Kaya', 'Max');
+    await waitForModel(page);
+    await expect(page.locator('#vaka-satir')).toHaveText('Max · Prepared for Mehmet Kaya, DVM');
+    await expect(page.locator('#parcalar li')).toHaveCount(1);
+    await expect(page.locator('#parcalar')).toContainText('Mass');
+    await expect(page.locator('#parcalar')).toContainText('Tumor');
+
+    // A refresh keeps this case, not the first one in the folder.
+    await page.reload();
+    await waitForModel(page);
+    await expect(page.locator('#vaka-satir')).toHaveText('Max · Prepared for Mehmet Kaya, DVM');
     expect(problems).toEqual([]);
   });
 });

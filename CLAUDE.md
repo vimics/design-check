@@ -1,6 +1,6 @@
 # Design Viewer · vimics.vet/design-check
 
-A static page from Vimics. A DVM types their name and the patient's name, and if both match the current case, sees the implant design (STL files) in 3D. Umut and teammates who don't code swap the case about every two weeks, following `case/README.md`. Keep that file plain and in step with how the case check works.
+A static page from Vimics. A DVM types their name and the patient's name, and if both match one of the live cases, sees that implant design (STL files) in 3D. Several cases are live at once, one folder each in `cases/`. Umut and teammates who don't code add and remove cases following `cases/README.md`. Keep that file plain and in step with how the case check works.
 
 Umut and Onur build this by working with AI agents. Explain what you change in plain words.
 
@@ -12,7 +12,7 @@ Umut and Onur build this by working with AI agents. Explain what you change in p
 | vimics.vet/segmentation/ | `vimics/segmentation` | V-Seg. Don't change it for this tool |
 | vimics.vet/design-check/ | `vimics/design-check` (this repo) | Design Viewer |
 
-- Every push to `main` goes live. `.github/workflows/deploy.yml` runs the unit tests, which include a check of `case/`, then builds into `dist/` and publishes. If the tests fail, the live site stays as it was.
+- Every push to `main` goes live. `.github/workflows/deploy.yml` runs the unit tests, which include a check of every folder in `cases/`, then builds into `dist/` and publishes. If the tests fail, the live site stays as it was.
 - `dist/` is built, never committed. Keep paths relative, because the site runs from a subfolder.
 - Never add a `CNAME` file. Repository and Pages settings are changed by Onur only.
 - **Never link this tool from vimics.vet or V-Seg.** Umut sends the link himself.
@@ -31,13 +31,14 @@ Umut and Onur build this by working with AI agents. Explain what you change in p
 
 ## Publishing a case for Umut
 
-- Replace everything in `case/` in one commit: delete the old STLs, add the new ones as `<label>.<tag>.stl`, and set `dvm`, `patient` and `note` in `case.json`.
+- Each case is a folder in `cases/`, named in lowercase after the patient, for example `cases/karamel/`. It holds the STLs as `<label>.<tag>.stl` and a `case.json` with `dvm`, `patient` and `note`. Add a case in one commit, and leave the other cases alone unless Umut says to remove one.
+- Two cases can't share the same DVM and patient names. The tests refuse it.
 - The tags are exactly these six: `bone`, `tumor`, `metal`, `resin-white`, `resin-clear`, `screw`. Don't add more unless Umut asks.
 - Run `npm test` before pushing. Then open the live page with the names and check that every part shows.
 
 ## Rules that must not break
 
-- The name check is soft, by Umut's choice on 2026-11-04: STLs and names are public in the repo. Don't describe it as secure or private.
+- The name check is soft, by Umut's choice on 2026-11-04: STLs and names are public in the repo, and since 2026-11-17, with several cases live, a DVM who reads the page's code could find other cases. Don't describe it as secure or private.
 - Keep `<meta name="robots" content="noindex">`.
 - Page text: no CE or FDA claims, no "best", "leading", "only" or "first", no guarantees, exclamation marks, emoji, prices or phone numbers.
 - Axes are only X, Y and Z, with no left or right labels. Units are millimetres.

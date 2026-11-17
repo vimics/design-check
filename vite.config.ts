@@ -31,7 +31,7 @@ function contentSecurityPolicy(): Plugin {
 export default defineConfig({
   base: './',
   // Unit tests check the case folder themselves, with a clearer report than a failed start.
-  plugins: process.env.VITEST ? [] : [contentSecurityPolicy(), casePlugin(process.env.CASE_DIR ?? 'case')],
+  plugins: process.env.VITEST ? [] : [contentSecurityPolicy(), casePlugin(process.env.CASE_DIR ?? 'cases')],
   build: { target: 'es2022', chunkSizeWarningLimit: 800 },
   worker: { format: 'es' },
   test: { include: ['test/**/*.test.ts'], testTimeout: 60_000 },

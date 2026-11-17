@@ -3,14 +3,16 @@ import type { CaseManifest, Part, PartMesh } from '../engine/types';
 import { LOOKS, Viewer, type MeasureKind, type Measurement } from '../engine/viewer/viewer';
 import { matches } from './check';
 
-const manifest = caseData as CaseManifest;
+const cases = caseData as CaseManifest[];
+/** The case the DVM opened. Set before openCase runs. */
+let manifest: CaseManifest = cases[0];
+let caseLine = '';
 const $ = <T extends HTMLElement = HTMLElement>(id: string) => document.getElementById(id) as T;
 const num = (n: number) => n.toLocaleString('en-GB');
 const LOGO = document.querySelector('.logo-link svg')?.outerHTML ?? '';
 /** Holds the case a DVM opened in this tab, so a refresh doesn't ask again but a new case does. */
 const OPENED = 'design-viewer-case';
 
-const caseLine = `${manifest.patient} · Prepared for ${manifest.dvm}, DVM`;
 const today = new Date().toLocaleDateString('en-GB', { day: 'numeric', month: 'short', year: 'numeric' });
 
 // ---- Screens ----------------------------------------------------------------------------------
@@ -35,13 +37,15 @@ $<HTMLFormElement>('form').addEventListener('submit', (e) => {
   e.preventDefault();
   const typed = { dvm: $<HTMLInputElement>('f-dvm').value, patient: $<HTMLInputElement>('f-patient').value };
   const error = $('giris-hata');
-  if (!matches(typed, manifest)) {
+  const found = cases.find((c) => matches(typed, c));
+  if (!found) {
     error.textContent = "These names don't match with a case. Check the spelling, or write to info@vimics.vet.";
     error.hidden = false;
     $('form').classList.add('hatali');
     $('f-dvm').focus();
     return;
   }
+  manifest = found;
   sessionStorage.setItem(OPENED, manifest.id);
   openCase();
 });
@@ -58,6 +62,7 @@ let seeThrough: boolean[] = [];
 
 function openCase() {
   show('loading');
+  caseLine = `${manifest.patient} · Prepared for ${manifest.dvm}, DVM`;
   $('vaka-satir').textContent = caseLine;
   $('vaka-satir').title = caseLine;
   $<HTMLAnchorElement>('yanit').href = `mailto:info@vimics.vet?subject=${encodeURIComponent(`Design – ${manifest.patient}`)}`;
@@ -311,5 +316,7 @@ if (!document.createElement('canvas').getContext('webgl2')) {
   show('error');
   $('hata-metin').textContent = 'This browser cannot show 3D graphics. Use a current version of Chrome, Edge, Safari or Firefox with hardware acceleration turned on.';
   $('yeniden').hidden = true;
-} else if (sessionStorage.getItem(OPENED) === manifest.id) openCase();
-else show('gate');
+} else {
+  const opened = cases.find((c) => c.id === sessionStorage.getItem(OPENED));
+  if (opened) { manifest = opened; openCase(); } else show('gate');
+}

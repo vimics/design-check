@@ -1,8 +1,9 @@
 import { createHash } from 'node:crypto';
-import { readdirSync, readFileSync } from 'node:fs';
+import { readdirSync, readFileSync, statSync } from 'node:fs';
 import { join } from 'node:path';
 import { gzipSync } from 'node:zlib';
 import type { Plugin } from 'vite';
+import { normalizeName } from '../src/app/check';
 import { TAGS, type CaseManifest, type Tag } from '../src/engine/types';
 
 export interface CaseFolder {
@@ -62,25 +63,56 @@ export function readCaseFolder(dir: string): { folder: CaseFolder; problems: str
   return { folder, problems };
 }
 
+export interface NamedCase extends CaseFolder { name: string; }
+
+/** Reads every case in the cases folder: one subfolder per case, each checked like a single case. */
+export function readCasesFolder(root: string): { cases: NamedCase[]; problems: string[] } {
+  const problems: string[] = [];
+  const cases: NamedCase[] = [];
+  let names: string[] = [];
+  try { names = readdirSync(root).sort((a, b) => a.localeCompare(b)); } catch { return { cases, problems: [`The folder ${root} is missing.`] }; }
+
+  for (const name of names) {
+    if (IGNORED.test(name)) continue;
+    if (!statSync(join(root, name)).isDirectory()) {
+      problems.push(`"${name}" is loose in ${root}. Put it inside a case folder, like ${root}/karamel/${name}.`);
+      continue;
+    }
+    const { folder, problems: own } = readCaseFolder(join(root, name));
+    for (const p of own) problems.push(`${name}: ${p}`);
+    if (own.length) continue;
+    const twin = cases.find((c) => normalizeName(c.dvm) === normalizeName(folder.dvm) && normalizeName(c.patient) === normalizeName(folder.patient));
+    if (twin) problems.push(`${name} and ${twin.name} have the same DVM and patient names, so only one could open. Delete the old one, or change a name.`);
+    else cases.push({ name, ...folder });
+  }
+  if (!cases.length && !problems.length) problems.push(`${root} has no cases. Add a folder with case.json and the STL files.`);
+  return { cases, problems };
+}
+
 const VIRTUAL = 'virtual:case', RESOLVED = '\0virtual:case';
 
-/** Hands the case to the page and publishes each STL gzipped, under a name that changes with its content. */
+/** One case for the page. Each STL is gzipped and named by its content, so cases can share the same map. */
+function toManifest(dir: string, folder: CaseFolder, files: Map<string, Buffer>): CaseManifest {
+  const parts = folder.parts.map((p) => {
+    const gz = gzipSync(readFileSync(join(dir, p.file)), { level: 9 });
+    const url = `case/${createHash('sha256').update(gz).digest('hex').slice(0, 12)}.stl.gz`;
+    files.set(url, gz);
+    return { url, label: p.label, tag: p.tag, bytes: gz.length };
+  });
+  const id = createHash('sha256').update(JSON.stringify([folder.dvm, folder.patient, parts.map((p) => p.url)])).digest('hex').slice(0, 12);
+  return { id, dvm: folder.dvm, patient: folder.patient, note: folder.note, parts };
+}
+
+/** Hands the cases to the page and publishes each STL gzipped, under a name that changes with its content. */
 export function casePlugin(dir: string): Plugin {
-  let manifest: CaseManifest;
+  let manifest: CaseManifest[];
   const files = new Map<string, Buffer>();
 
   const load = () => {
-    const { folder, problems } = readCaseFolder(dir);
-    if (problems.length) throw new Error(`The case folder has problems:\n- ${problems.join('\n- ')}`);
+    const { cases, problems } = readCasesFolder(dir);
+    if (problems.length) throw new Error(`The cases folder has problems:\n- ${problems.join('\n- ')}`);
     files.clear();
-    const parts = folder.parts.map((p) => {
-      const gz = gzipSync(readFileSync(join(dir, p.file)), { level: 9 });
-      const url = `case/${createHash('sha256').update(gz).digest('hex').slice(0, 12)}.stl.gz`;
-      files.set(url, gz);
-      return { url, label: p.label, tag: p.tag, bytes: gz.length };
-    });
-    const id = createHash('sha256').update(JSON.stringify([folder.dvm, folder.patient, parts.map((p) => p.url)])).digest('hex').slice(0, 12);
-    manifest = { id, dvm: folder.dvm, patient: folder.patient, note: folder.note, parts };
+    manifest = cases.map((c) => toManifest(join(dir, c.name), c, files));
   };
 
   return {

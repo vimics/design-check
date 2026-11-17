@@ -1,8 +1,8 @@
-import { mkdtempSync, readFileSync, writeFileSync } from 'node:fs';
+import { mkdirSync, mkdtempSync, readFileSync, writeFileSync } from 'node:fs';
 import { tmpdir } from 'node:os';
 import { join } from 'node:path';
 import { describe, expect, it } from 'vitest';
-import { parsePartName, readCaseFolder } from '../plugins/case';
+import { parsePartName, readCaseFolder, readCasesFolder } from '../plugins/case';
 import { readStl } from '../src/engine/stl';
 import { binaryStl, box } from './shapes';
 
@@ -51,14 +51,67 @@ describe('case folder', () => {
     expect(f.parts.map((p) => p.label)).toEqual(['Tibia', 'Mass', 'Plate', 'A screw']);
   });
 
-  // The deploy runs this first, so a mistake in the live case stops it before anything is published.
-  for (const dir of ['case', 'e2e/fixture-case']) {
+});
+
+describe('cases folder', () => {
+  const stl = binaryStl(box([0, 0, 0], [1, 1, 1]));
+  /** Builds a cases folder: each key is a case folder (or a loose file), each value its files. */
+  const root = (cases: Record<string, Record<string, string | Uint8Array> | string>) => {
+    const dir = mkdtempSync(join(tmpdir(), 'cases-'));
+    for (const [name, files] of Object.entries(cases)) {
+      if (typeof files === 'string') { writeFileSync(join(dir, name), files); continue; }
+      mkdirSync(join(dir, name));
+      for (const [file, body] of Object.entries(files)) writeFileSync(join(dir, name, file), body);
+    }
+    return dir;
+  };
+
+  it('reads each case folder', () => {
+    const { cases, problems } = readCasesFolder(root({
+      karamel: { 'case.json': '{ "dvm": "A B", "patient": "Karamel" }', 'Tibia.bone.stl': stl },
+      max: { 'case.json': '{ "dvm": "C D", "patient": "Max" }', 'Mass.tumor.stl': stl },
+      'README.md': 'x',
+      '.DS_Store': 'x',
+    }));
+    expect(problems).toEqual([]);
+    expect(cases.map((c) => [c.name, c.patient])).toEqual([['karamel', 'Karamel'], ['max', 'Max']]);
+  });
+
+  it('names the case folder in each problem', () => {
+    const { problems } = readCasesFolder(root({
+      karamel: { 'case.json': '{ "dvm": "A B", "patient": "Karamel" }', 'Tibia.stl': stl },
+      empty: {},
+    }));
+    expect(problems.join('\n')).toContain('karamel: "Tibia.stl" needs a tag');
+    expect(problems.join('\n')).toMatch(/empty: .*case\.json is missing/);
+  });
+
+  it('explains a loose file outside the case folders', () => {
+    const { problems } = readCasesFolder(root({ 'Tibia.bone.stl': 'x' }));
+    expect(problems.join('\n')).toContain('"Tibia.bone.stl" is loose');
+  });
+
+  it('refuses two cases with the same names, however they are typed', () => {
+    const { problems } = readCasesFolder(root({
+      a: { 'case.json': '{ "dvm": "Ayşe Yılmaz", "patient": "Max" }', 'T.bone.stl': stl },
+      b: { 'case.json': '{ "dvm": "Dr. ayse yilmaz", "patient": "MAX" }', 'T.bone.stl': stl },
+    }));
+    expect(problems.join('\n')).toContain('b and a have the same DVM and patient names');
+  });
+
+  it('needs at least one case', () => {
+    expect(readCasesFolder(root({})).problems[0]).toContain('has no cases');
+  });
+
+  // The deploy runs this first, so a mistake in a live case stops it before anything is published.
+  for (const dir of ['cases', 'e2e/fixture-cases']) {
     it(`${dir} is ready to publish`, () => {
-      const { folder: f, problems } = readCaseFolder(dir);
+      const { cases, problems } = readCasesFolder(dir);
       expect(problems).toEqual([]);
-      for (const p of f.parts) {
-        const mesh = readStl(new Uint8Array(readFileSync(join(dir, p.file))));
-        expect(mesh.triangles, `${p.file} has no triangles`).toBeGreaterThan(0);
+      expect(cases.length).toBeGreaterThan(0);
+      for (const c of cases) for (const p of c.parts) {
+        const mesh = readStl(new Uint8Array(readFileSync(join(dir, c.name, p.file))));
+        expect(mesh.triangles, `${c.name}/${p.file} has no triangles`).toBeGreaterThan(0);
       }
     });
   }

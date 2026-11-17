@@ -1,6 +1,6 @@
 import { defineConfig } from '@playwright/test';
 
-/** Builds against the fixture case, so the tests never depend on the case that is live. */
+/** Builds against the fixture cases, so the tests never depend on the case that is live. */
 export default defineConfig({
   testDir: 'e2e',
   timeout: 60_000,
@@ -13,7 +13,7 @@ export default defineConfig({
   },
   webServer: {
     command: 'npx vite build --outDir dist-e2e && npx vite preview --outDir dist-e2e --port 4179 --strictPort',
-    env: { CASE_DIR: 'e2e/fixture-case' },
+    env: { CASE_DIR: 'e2e/fixture-cases' },
     url: 'http://localhost:4179',
     reuseExistingServer: false,
     timeout: 120_000,
