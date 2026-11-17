@@ -20,7 +20,7 @@ Rename each file on your computer before uploading: `<name>.<tag>.stl`
 | Tag | Shows as |
 |---|---|
 | `bone` | Ivory |
-| `tumor` | Olive |
+| `tumor` | Rust brown |
 | `metal` | Metal grey |
 | `resin-white` | White |
 | `resin-clear` | Clear, like a surgical guide |

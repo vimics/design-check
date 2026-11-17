@@ -16,7 +16,7 @@ const HIGHLIGHT = 0x4cb088;
 /** How each material looks. `reflect` is how much of a soft room the surface mirrors, so metal reads as metal. */
 export const LOOKS: Record<Tag, { name: string; color: number; roughness: number; metalness: number; opacity: number; reflect: number }> = {
   bone: { name: 'Bone', color: 0xf6ecd6, roughness: 0.68, metalness: 0, opacity: 1, reflect: 0 },
-  tumor: { name: 'Tumor', color: 0x787750, roughness: 0.6, metalness: 0, opacity: 1, reflect: 0 },
+  tumor: { name: 'Tumor', color: 0x9c5c2c, roughness: 0.6, metalness: 0, opacity: 1, reflect: 0 },
   metal: { name: 'Metal', color: 0xb9c0c8, roughness: 0.32, metalness: 0.75, opacity: 1, reflect: 1 },
   'resin-white': { name: 'Resin, white', color: 0xf7f7f4, roughness: 0.5, metalness: 0, opacity: 1, reflect: 0 },
   'resin-clear': { name: 'Resin, clear', color: 0xdcecf0, roughness: 0.15, metalness: 0, opacity: 0.45, reflect: 0.6 },
