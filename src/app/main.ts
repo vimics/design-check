@@ -55,7 +55,7 @@ for (const id of ['f-dvm', 'f-patient']) {
 let viewer: Viewer | null = null;
 let parts: Part[] = [];
 let visible: boolean[] = [];
-let seeThrough: boolean[] = [];
+let opacity: number[] = [];
 
 function openCase() {
   show('loading');
@@ -83,7 +83,7 @@ function openCase() {
       worker.terminate();
       parts = manifest.parts.map((p, i) => ({ ...meshes[i], label: p.label, tag: p.tag }));
       visible = parts.map(() => true);
-      seeThrough = parts.map(() => false);
+      opacity = parts.map((p) => LOOKS[p.tag].opacity);
       show('viewer');
       const v = ensureViewer();
       v.setParts(parts);
@@ -138,8 +138,9 @@ function renderStructures() {
     box.setAttribute('aria-label', `Show ${p.label}`);
     box.addEventListener('change', () => setVisible(i, box.checked));
     const swatch = document.createElement('span');
-    swatch.className = `renk${look.opacity < 1 ? ' saydam' : ''}`;
+    swatch.className = 'renk';
     swatch.style.setProperty('--renk', hex(look.color));
+    swatch.style.setProperty('--alfa', `${Math.round(opacity[i] * 100)}%`);
     const name = document.createElement('span');
     name.className = 'ad';
     const label = document.createElement('b');
@@ -147,20 +148,25 @@ function renderStructures() {
     const kind = document.createElement('small');
     kind.textContent = look.name;
     name.append(label, kind);
-    const through = document.createElement('button');
-    through.type = 'button';
-    through.className = 'gecirgen';
-    through.title = 'See through';
-    through.setAttribute('aria-label', `See through ${p.label}`);
-    through.setAttribute('aria-pressed', String(seeThrough[i]));
-    through.disabled = !visible[i];
-    through.innerHTML = '<svg viewBox="0 0 16 16" aria-hidden="true"><circle cx="6" cy="8" r="4.5"/><circle cx="10" cy="8" r="4.5"/></svg>';
-    through.addEventListener('click', () => {
-      seeThrough[i] = !seeThrough[i];
-      viewer?.setSeeThrough(i, seeThrough[i]);
-      renderStructures();
+    const fade = document.createElement('input');
+    fade.type = 'range';
+    fade.className = 'saydamlik';
+    fade.min = '10';
+    fade.max = String(Math.round(look.opacity * 100));
+    fade.step = '1';
+    fade.value = String(Math.round(opacity[i] * 100));
+    fade.title = 'Opacity';
+    fade.setAttribute('aria-label', `Opacity of ${p.label}`);
+    fade.disabled = !visible[i];
+    syncSlider(fade);
+    // Updates in place: rebuilding the list here would drop the slider mid-drag.
+    fade.addEventListener('input', () => {
+      opacity[i] = +fade.value / 100;
+      viewer?.setOpacity(i, opacity[i]);
+      swatch.style.setProperty('--alfa', `${fade.value}%`);
+      syncSlider(fade);
     });
-    li.append(box, swatch, name, through);
+    li.append(box, swatch, name, fade);
     li.addEventListener('mouseenter', () => viewer?.highlightStructure(i, true));
     li.addEventListener('mouseleave', () => viewer?.highlightStructure(i, false));
     ul.append(li);

@@ -182,22 +182,17 @@ input[type="checkbox"]:checked::before { background: var(--vurgu-anlamli); }
 .vaka { flex: 1 1 auto; }
 .vaka span { overflow: hidden; text-overflow: ellipsis; }
 
-/* Structures: visibility, material, name and the see-through toggle */
+/* Structures: visibility, material, name, and an opacity slider under the name */
 .parcalar { list-style: none; margin: 0; padding: 0; display: grid; gap: 2px; }
-.parcalar li { display: grid; grid-template-columns: 16px 12px minmax(0, 1fr) 28px; align-items: center; gap: var(--b2); min-height: 38px; }
+.parcalar li { display: grid; grid-template-columns: 16px 12px minmax(0, 1fr); align-items: center; gap: 0 var(--b2); min-height: 38px; padding-bottom: var(--b1); }
+.parcalar .saydamlik { grid-column: 3; height: 18px; }
 .parcalar .ad { display: grid; min-width: 0; line-height: 1.25; }
 .parcalar .ad b { font-size: 13px; font-weight: 500; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
 .parcalar .ad small { font: 400 11.5px/1.3 var(--mono); color: var(--metin-ikincil); }
 .parcalar li:hover .ad b { color: var(--baslik); }
 .parcalar li.kapali .ad b, .parcalar li.kapali .ad small { color: var(--metin-ikincil); }
 .parcalar li.kapali .renk { opacity: 0.35; }
-.renk { width: 12px; height: 12px; border-radius: 50%; background: var(--renk); box-shadow: inset 0 0 0 1px rgba(43, 52, 64, 0.35); }
-.renk.saydam { background: color-mix(in srgb, var(--renk) 45%, transparent); }
-.gecirgen { display: grid; place-items: center; width: 28px; height: 28px; padding: 0; background: var(--zemin); border: 1px solid var(--kenarlik); border-radius: var(--r2); color: var(--metin-ikincil); cursor: pointer; }
-.gecirgen svg { width: 15px; height: 15px; fill: none; stroke: currentColor; stroke-width: 1.3; }
-.gecirgen:hover:not(:disabled) { color: var(--baslik); border-color: var(--kenarlik-kontrol); }
-.gecirgen[aria-pressed="true"] { background: var(--eylem-zemin); border-color: var(--eylem-zemin); color: var(--eylem-metin); }
-.gecirgen:disabled { opacity: 0.35; cursor: default; }
+.renk { width: 12px; height: 12px; border-radius: 50%; background: color-mix(in srgb, var(--renk) var(--alfa, 100%), transparent); box-shadow: inset 0 0 0 1px rgba(43, 52, 64, 0.35); }
 .yakinda p:not(.etiket) { white-space: pre-line; }
 .eylem { display: flex; flex-wrap: wrap; gap: var(--b2); }
 

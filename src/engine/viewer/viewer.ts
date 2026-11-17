@@ -22,7 +22,6 @@ export const LOOKS: Record<Tag, { name: string; color: number; roughness: number
   'resin-clear': { name: 'Resin, clear', color: 0xdcecf0, roughness: 0.15, metalness: 0, opacity: 0.45, reflect: 0.6 },
   screw: { name: 'Screw', color: 0x1f3a6e, roughness: 0.35, metalness: 0.6, opacity: 1, reflect: 1 },
 };
-const SEE_THROUGH = 0.3;
 const FACES: Record<string, Vec3> = { z: [0, 0, 1], '-z': [0, 0, -1], x: [1, 0, 0], '-x': [-1, 0, 0], y: [0, 1, 0], '-y': [0, -1, 0] };
 
 export type MeasureKind = 'distance' | 'angle';
@@ -53,11 +52,15 @@ export interface ViewerEvents {
   onCameraMoved(): void;
 }
 
+/** Made more transparent than its material: clicks pass through it and it shows no section caps. */
+const seeThrough = (s: StructureView) => s.opacity < LOOKS[s.tag].opacity;
+
 interface StructureView {
   mesh: THREE.Mesh;
   tag: Tag;
   visible: boolean;
-  seeThrough: boolean;
+  /** 0 to 1. Starts at the material's own opacity and can only be lowered. */
+  opacity: number;
   /** Two stencil passes per section plane, then the cap that fills the cut, in this part's colour. */
   stencils: THREE.Mesh[];
   caps: THREE.Mesh[];
@@ -240,7 +243,7 @@ export class Viewer {
     mesh.userData.index = index;
     this.root.add(mesh);
 
-    const view: StructureView = { mesh, tag: part.tag, visible: true, seeThrough: false, stencils: [], caps: [], capMaterials: [], pickCapMaterials: [] };
+    const view: StructureView = { mesh, tag: part.tag, visible: true, opacity: LOOKS[part.tag].opacity, stencils: [], caps: [], capMaterials: [], pickCapMaterials: [] };
     const capColor = new THREE.Color(look.color).multiplyScalar(0.84);
     this.planes.forEach((plane, i) => {
       const order = 1 + i * 1000 + index * 2;
@@ -268,18 +271,19 @@ export class Viewer {
   }
 
   private applyLook(s: StructureView) {
-    const look = LOOKS[s.tag];
-    const opacity = s.seeThrough ? Math.min(look.opacity, SEE_THROUGH) : look.opacity;
     const m = s.mesh.material as THREE.MeshStandardMaterial;
-    m.transparent = opacity < 1;
-    m.opacity = opacity;
-    m.depthWrite = opacity === 1;
-    m.needsUpdate = true;
+    m.opacity = s.opacity;
+    m.depthWrite = s.opacity === 1;
+    // Only a switch between solid and transparent rebuilds the shader, so dragging a slider stays cheap.
+    if (m.transparent !== s.opacity < 1) {
+      m.transparent = s.opacity < 1;
+      m.needsUpdate = true;
+    }
   }
 
-  /** A see-through part shows no caps, so the parts inside it stay in view. */
+  /** A part made more transparent than its material shows no caps, so the parts inside it stay in view. */
   private applySections(s: StructureView) {
-    const on = (plane: number) => this.clipOn[plane] && s.visible && !s.seeThrough;
+    const on = (plane: number) => this.clipOn[plane] && s.visible && !seeThrough(s);
     for (const m of s.stencils) m.visible = on(m.userData.plane);
     s.caps.forEach((q, i) => { q.visible = on(i); });
   }
@@ -293,10 +297,10 @@ export class Viewer {
     this.requestRender();
   }
 
-  setSeeThrough(i: number, on: boolean) {
+  setOpacity(i: number, value: number) {
     const s = this.structures[i];
     if (!s) return;
-    s.seeThrough = on;
+    s.opacity = Math.min(Math.max(value, 0), LOOKS[s.tag].opacity);
     this.applyLook(s);
     this.applySections(s);
     this.requestRender();
@@ -507,7 +511,7 @@ export class Viewer {
     const restore = this.structures.map((s, i) => {
       const original = s.mesh.material, before = s.mesh.onBeforeRender, shown = s.mesh.visible;
       // A click passes through a see-through part to what is behind it.
-      if (s.seeThrough) s.mesh.visible = false;
+      if (seeThrough(s)) s.mesh.visible = false;
       s.mesh.material = this.pickMaterial;
       s.mesh.onBeforeRender = () => {
         this.pickMaterial.uniforms.pickId.value = i + 1;
@@ -545,7 +549,7 @@ export class Viewer {
   private pickByRay(clientX: number, clientY: number, b: DOMRect) {
     const ray = new THREE.Raycaster();
     ray.setFromCamera(new THREE.Vector2(((clientX - b.left) / b.width) * 2 - 1, -((clientY - b.top) / b.height) * 2 + 1), this.camera);
-    const hits = ray.intersectObjects(this.structures.filter((s) => s.visible && !s.seeThrough).map((s) => s.mesh), false);
+    const hits = ray.intersectObjects(this.structures.filter((s) => s.visible && !seeThrough(s)).map((s) => s.mesh), false);
     const hit = hits.find((h) => this.planes.every((p, i) => !this.clipOn[i] || p.distanceToPoint(h.point) >= 0));
     return hit ? { point: hit.point.clone(), structure: hit.object.userData.index as number } : null;
   }

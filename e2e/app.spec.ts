@@ -111,10 +111,10 @@ test.describe('viewer', () => {
 
   test('hiding and see-through respond, from the list and from the model', async ({ page }) => {
     await openCase(page);
-    await page.locator('#parcalar input').nth(2).uncheck();
+    await page.locator('#parcalar input[type=checkbox]').nth(2).uncheck();
     await expect(page.locator('#ozet')).toContainText('4 of 5 parts');
     await expect(page.locator('#parcalar li').nth(2)).toHaveClass('kapali');
-    await expect(page.locator('#parcalar .gecirgen').nth(2)).toBeDisabled();
+    await expect(page.locator('#parcalar .saydamlik').nth(2)).toBeDisabled();
 
     // Square on to the plate, from +X.
     await page.click('#kup button[data-yuz="x"]');
@@ -124,15 +124,17 @@ test.describe('viewer', () => {
     await expect(page.locator('#aksiyon-yazi')).toHaveText('TPLO plate 3.5 mm');
 
     // A see-through plate lets the click reach the bone behind it.
-    await page.click('button[aria-label="See through TPLO plate 3.5 mm"]');
-    await expect(page.locator('button[aria-label="See through TPLO plate 3.5 mm"]')).toHaveAttribute('aria-pressed', 'true');
+    const plate = page.locator('input[aria-label="Opacity of TPLO plate 3.5 mm"]');
+    await expect(plate).toHaveValue('100');
+    await plate.evaluate((el: HTMLInputElement) => { el.value = '20'; el.dispatchEvent(new Event('input', { bubbles: true })); });
+    await expect(plate).toHaveValue('20');
     await page.mouse.click(c.x, c.y);
     await expect(page.locator('#aksiyon-yazi')).toHaveText('Tibia');
     await page.click('#aksiyon-gizle');
     await expect(page.locator('#ozet')).toContainText('3 of 5 parts');
-    await expect(page.locator('#parcalar input').first()).not.toBeChecked();
+    await expect(page.locator('#parcalar input[type=checkbox]').first()).not.toBeChecked();
 
-    for (const box of await page.locator('#parcalar input').all()) await box.uncheck();
+    for (const box of await page.locator('#parcalar input[type=checkbox]').all()) await box.uncheck();
     await expect(page.locator('#ipucu')).toHaveText('Every part is hidden. Tick one under Structures.');
   });
 
@@ -199,7 +201,7 @@ test.describe('small screens', () => {
       }
       await enter(page);
       await waitForModel(page);
-      for (const selector of ['.logo-link svg', '#yanit', '#tema', '#sigdir', '.kup-kap', '#ozet', '#parcalar .gecirgen']) {
+      for (const selector of ['.logo-link svg', '#yanit', '#tema', '#sigdir', '.kup-kap', '#ozet', '#parcalar .saydamlik']) {
         const box = (await page.locator(selector).first().boundingBox())!;
         expect(box.x, `${selector} left`).toBeGreaterThanOrEqual(-1);
         expect(box.x + box.width, `${selector} right`).toBeLessThanOrEqual(width + 1);
